@@ -173,3 +173,73 @@ alter policy docs_delete on public.docs using (
   or ((collection = 'cats') and (me_role() = any (array['storekeeper','procurement'])))
   or ((collection = 'vehicles') and (me_role() = 'jeff'))
 );
+
+-- ===== 22 Oct 2026 (b): help messages. These policies replace the 22 Oct (a) ones above =====
+-- Additive changes only. Every existing rule is kept exactly as it was.
+
+-- READ
+alter policy docs_select on public.docs using (
+  ((me_role() = any (array['directors','jeff','walter','screen1','screen2','screen3'])) and collection <> 'tickets')
+  or ((me_role() = any (array['procurement','storekeeper'])) and (collection = any (array['jobs','settings','stock','moves','matreq','po','crew','cats'])))
+  or ((me_role() = 'procurement') and collection = 'files' and (data ->> 'by') = 'procurement')
+  or ((me_role() = 'crew') and (collection = any (array['jobs','items','crew','batches','settings'])))
+  or ((collection = 'jobs') and (id = any (me_jobs())))
+  or ((collection = any (array['items','batches','files'])) and ((data ->> 'job') = any (me_jobs()))
+      and not (collection = 'files' and coalesce(data ->> 'internal','false') = 'true'))
+  or ((collection = 'tickets') and (me_role() = 'directors' or (data ->> 'by') = auth.uid()::text))
+);
+
+-- CREATE
+alter policy docs_insert on public.docs with check (
+  ((collection = any (array['jobs','items','rules'])) and (me_role() = any (array['directors','jeff'])))
+  or ((collection = any (array['batches','crew'])) and (me_role() = any (array['directors','jeff','walter'])))
+  or ((collection = 'files') and ((me_role() = any (array['directors','jeff','walter'])) or ((data ->> 'job') = any (me_jobs()))))
+  or ((collection = 'files') and me_role() = 'procurement')
+  or ((collection = any (array['stock','moves'])) and (me_role() = any (array['directors','storekeeper','procurement'])))
+  or ((collection = 'matreq') and (me_role() = any (array['directors','jeff','walter'])))
+  or ((collection = 'po') and (me_role() = any (array['directors','jeff','storekeeper','procurement'])))
+  or ((collection = 'settings') and (me_role() = 'directors'))
+  or ((collection = 'cats') and (me_role() = any (array['directors','storekeeper','procurement'])))
+  or ((collection = 'vehicles') and (me_role() = any (array['directors','jeff'])))
+  or ((collection = 'tickets') and me_role() is not null and (data ->> 'by') = auth.uid()::text)
+);
+
+-- CHANGE (same list for USING and WITH CHECK)
+alter policy docs_update on public.docs using (
+  ((collection = 'items') and (me_role() = any (array['directors','jeff','walter','crew'])))
+  or ((collection = 'crew') and (me_role() = any (array['directors','jeff','walter'])))
+  or ((collection = 'jobs') and (me_role() = any (array['directors','jeff','procurement'])))
+  or ((collection = 'rules') and (me_role() = any (array['directors','jeff'])))
+  or ((collection = 'jobs') and (id = any (me_jobs())))
+  or ((collection = 'batches') and ((me_role() = any (array['directors','jeff','walter'])) or ((data ->> 'job') = any (me_jobs()))))
+  or ((collection = 'stock') and (me_role() = any (array['directors','storekeeper','procurement'])))
+  or ((collection = 'matreq') and (me_role() = any (array['directors','jeff','walter','storekeeper'])))
+  or ((collection = 'po') and (me_role() = any (array['directors','jeff','storekeeper','procurement'])))
+  or ((collection = 'settings') and (me_role() = 'directors'))
+  or ((collection = 'vehicles') and (me_role() = any (array['directors','jeff'])))
+  or ((collection = 'tickets') and (me_role() = 'directors' or (data ->> 'by') = auth.uid()::text))
+);
+alter policy docs_update on public.docs with check (
+  ((collection = 'items') and (me_role() = any (array['directors','jeff','walter','crew'])))
+  or ((collection = 'crew') and (me_role() = any (array['directors','jeff','walter'])))
+  or ((collection = 'jobs') and (me_role() = any (array['directors','jeff','procurement'])))
+  or ((collection = 'rules') and (me_role() = any (array['directors','jeff'])))
+  or ((collection = 'jobs') and (id = any (me_jobs())))
+  or ((collection = 'batches') and ((me_role() = any (array['directors','jeff','walter'])) or ((data ->> 'job') = any (me_jobs()))))
+  or ((collection = 'stock') and (me_role() = any (array['directors','storekeeper','procurement'])))
+  or ((collection = 'matreq') and (me_role() = any (array['directors','jeff','walter','storekeeper'])))
+  or ((collection = 'po') and (me_role() = any (array['directors','jeff','storekeeper','procurement'])))
+  or ((collection = 'settings') and (me_role() = 'directors'))
+  or ((collection = 'vehicles') and (me_role() = any (array['directors','jeff'])))
+  or ((collection = 'tickets') and (me_role() = 'directors' or (data ->> 'by') = auth.uid()::text))
+);
+
+-- REMOVE
+alter policy docs_delete on public.docs using (
+  (me_role() = 'directors')
+  or ((collection = 'crew') and (me_role() = any (array['jeff','walter'])))
+  or ((collection = any (array['files','rules'])) and (me_role() = 'jeff'))
+  or ((collection = 'files') and me_role() = 'procurement' and (data ->> 'by') = 'procurement')
+  or ((collection = 'cats') and (me_role() = any (array['storekeeper','procurement'])))
+  or ((collection = 'vehicles') and (me_role() = 'jeff'))
+);

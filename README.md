@@ -40,6 +40,9 @@ These rules are enforced by the database, not just hidden in the screen.
 - **Stock removal:** the storekeeper requests, Procurement confirms (soft delete, history kept).
 - **Procurement:** a Documents tab (internal, hidden from clients and Walter) and a purchase price history filled from prices entered when an order is placed.
 
+- **One floor screen:** a single screen shows all three rooms side by side, with timers, late warnings and the express job. Only one screen account is needed.
+- **Help button (everyone):** quick answers by role, a form to ask a question or report a problem, and an inbox where directors and the owner answer. The sender gets a phone alert with the answer.
+
 ## Honest limits of this first version
 - Uploaded files use a public bucket with long unguessable links. Anyone handed a link can open that file. Private links are the next security step.
 - A client can read and change only their own job's rows, but the database does not yet stop them changing fields they should not (for example the step number). Field-level protection is the next step.
